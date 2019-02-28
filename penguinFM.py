@@ -11,12 +11,14 @@ import pickle
 from bs4 import BeautifulSoup
 from feedgen.feed import FeedGenerator
 import json
+import datetime
 
 # 文件保存的
 DIR = "/var/www/html/rss/"
+# DIR = "./"
 HOST = "http://enotx.com/rss/"
 
-FILE_LIMIT = 5
+FILE_LIMIT = 3
 
 HEADERS = {
     'authority': 'fm.qq.com',
@@ -27,7 +29,6 @@ HEADERS = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     'accept-encoding': 'gzip, deflate, br',
     'accept-language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
-    'cookie': 'pgv_pvi=9128641536; pgv_pvid=9594262732; pac_uid=0_3ffc8e1ee4ee6; tvfe_boss_uuid=63d3c4353acee892; sd_userid=49011535868934958; sd_cookie_crttime=1535868934958; pgv_si=s5475403776; pgv_info=ssid=s3541328844; plCache=discover.banner_0_0',
 }
 
 ENV = 'prod'
@@ -63,6 +64,7 @@ def getPlaylist(p):
             data = i
             break
     data = json.loads(data[28:])
+
     return data["syncData"]["albumPageData"]["showList"]["showList"][:FILE_LIMIT]
 
 
@@ -71,7 +73,7 @@ if __name__ == '__main__':
     for i in fm_list.keys():
         target_fm = fm_list[i]['params']
         playlist = getPlaylist(p = target_fm)
-        
+
         #下载最近的一个音频
         a = playlist[0]
         doc = requests.get(a["share"]["dataUrl"], headers=HEADERS)
@@ -91,6 +93,7 @@ if __name__ == '__main__':
         fg.subtitle("第一财经周刊")
         fg.link( href=HOST, rel='self' )
         fg.language('zh')
+        fg.updated(datetime.datetime.now(datetime.timezone.utc))
 
         fg.podcast.itunes_category('Technology', 'Podcasting')
 
